@@ -142,7 +142,8 @@ header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
+client = Groq(api_key=api_key)
 
 PERSONAS = {
     "◆ Professional Assistant": "You are a highly professional AI assistant. You are precise, concise, and always helpful. You speak formally and deliver accurate information efficiently.",
