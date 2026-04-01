@@ -101,6 +101,7 @@ with st.sidebar:
             for page in pdf_reader.pages:
                 pdf_text += page.extract_text()
                 pdf_text = pdf_text[:150000]
+                st.write(f"DEBUG: Extracted {len(pdf_text)} characters from PDF")
 
             st.session_state.chat_history[0] = [
                 {
