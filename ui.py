@@ -1,6 +1,8 @@
 import streamlit as st
 from groq import Groq
 from dotenv import load_dotenv
+import PyPDF2
+import io
 import os
 
 load_dotenv()
@@ -15,24 +17,10 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=Inter:wght@300;400;500&display=swap');
 
-html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
-}
-
-.stApp {
-    background: #0a0a0f;
-}
-
-section[data-testid="stSidebar"] {
-    background: #0f0f18;
-    border-right: 1px solid #1e1e2e;
-}
-
-.main-header {
-    text-align: center;
-    padding: 2rem 0 1rem;
-}
-
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+.stApp { background: #0a0a0f; }
+section[data-testid="stSidebar"] { background: #0f0f18; border-right: 1px solid #1e1e2e; }
+.main-header { text-align: center; padding: 2rem 0 1rem; }
 .main-header h1 {
     font-family: 'Syne', sans-serif;
     font-size: 2.8rem;
@@ -44,7 +32,6 @@ section[data-testid="stSidebar"] {
     margin: 0;
     letter-spacing: -0.02em;
 }
-
 .main-header p {
     color: #4a4a6a;
     font-size: 0.9rem;
@@ -53,23 +40,7 @@ section[data-testid="stSidebar"] {
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
-
-.divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #1e1e3e, transparent);
-    margin: 1rem 0 2rem;
-}
-
-[data-testid="stChatMessage"] {
-    background: transparent !important;
-    border: none !important;
-    padding: 0.5rem 0 !important;
-}
-
-[data-testid="stChatMessage"][data-testid*="user"] {
-    flex-direction: row-reverse !important;
-}
-
+.divider { height: 1px; background: linear-gradient(90deg, transparent, #1e1e3e, transparent); margin: 1rem 0 2rem; }
 .stChatMessageContent {
     background: #13131f !important;
     border: 1px solid #1e1e3e !important;
@@ -79,63 +50,20 @@ section[data-testid="stSidebar"] {
     line-height: 1.7 !important;
     padding: 1rem 1.2rem !important;
 }
-
 [data-testid="stChatInput"] {
     background: #0f0f1a !important;
     border: 1px solid #2a2a4a !important;
     border-radius: 16px !important;
     color: #e0e0ff !important;
 }
-
 [data-testid="stChatInput"]:focus-within {
     border-color: #a78bfa !important;
     box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.15) !important;
 }
-
-.sidebar-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #a78bfa;
-    margin-bottom: 1rem;
-}
-
-.stat-box {
-    background: #13131f;
-    border: 1px solid #1e1e2e;
-    border-radius: 12px;
-    padding: 0.8rem 1rem;
-    margin-bottom: 0.6rem;
-}
-
-.stat-label {
-    color: #4a4a6a;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-}
-
-.stat-value {
-    color: #e0e0ff;
-    font-size: 1rem;
-    font-weight: 500;
-    margin-top: 0.2rem;
-}
-
-.persona-btn {
-    width: 100%;
-    background: #13131f;
-    border: 1px solid #1e1e2e;
-    border-radius: 10px;
-    padding: 0.6rem 1rem;
-    color: #8080a0;
-    font-size: 0.85rem;
-    text-align: left;
-    cursor: pointer;
-    margin-bottom: 0.4rem;
-    transition: all 0.2s;
-}
-
+.sidebar-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 600; color: #a78bfa; margin-bottom: 1rem; }
+.stat-box { background: #13131f; border: 1px solid #1e1e2e; border-radius: 12px; padding: 0.8rem 1rem; margin-bottom: 0.6rem; }
+.stat-label { color: #4a4a6a; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; }
+.stat-value { color: #e0e0ff; font-size: 1rem; font-weight: 500; margin-top: 0.2rem; }
 footer {visibility: hidden;}
 #MainMenu {visibility: hidden;}
 header {visibility: hidden;}
@@ -154,18 +82,36 @@ PERSONAS = {
 
 with st.sidebar:
     st.markdown('<div class="sidebar-title">◆ ARIA ASSISTANT</div>', unsafe_allow_html=True)
-    
+
     st.markdown("**Persona**")
     selected_persona = st.selectbox(
         "Choose personality",
         list(PERSONAS.keys()),
         label_visibility="collapsed"
     )
-    
+
     st.markdown("<br>", unsafe_allow_html=True)
-    
+    st.markdown("**Upload a document**")
+    uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
+
+    if uploaded_file is not None:
+        pdf_reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.read()))
+        pdf_text = ""
+        for page in pdf_reader.pages:
+            pdf_text += page.extract_text()
+
+        st.session_state.chat_history = [
+            {
+                "role": "system",
+                "content": f"You are a helpful assistant. Answer questions based on this document:\n\n{pdf_text}"
+            }
+        ]
+        st.success("Document loaded! Ask me anything about it.")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
     message_count = len([m for m in st.session_state.get("chat_history", []) if m["role"] != "system"])
-    
+
     st.markdown(f"""
     <div class="stat-box">
         <div class="stat-label">Messages</div>
@@ -180,17 +126,16 @@ with st.sidebar:
         <div class="stat-value" style="color:#34d399">● Online</div>
     </div>
     """, unsafe_allow_html=True)
-    
+
     st.markdown("<br>", unsafe_allow_html=True)
-    
+
     if st.button("🗑️ Clear conversation"):
         st.session_state.chat_history = [
             {"role": "system", "content": PERSONAS[selected_persona]}
         ]
         st.rerun()
 
-if "chat_history" not in st.session_state or \
-   st.session_state.chat_history[0]["content"] != PERSONAS[selected_persona]:
+if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
         {"role": "system", "content": PERSONAS[selected_persona]}
     ]
