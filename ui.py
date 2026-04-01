@@ -94,18 +94,21 @@ with st.sidebar:
     uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
 
     if uploaded_file is not None:
-        pdf_reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.read()))
-        pdf_text = ""
-        for page in pdf_reader.pages:
-            pdf_text += page.extract_text()
+        file_name = uploaded_file.name
+        if st.session_state.get("loaded_file") != file_name:
+            pdf_reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.read()))
+            pdf_text = ""
+            for page in pdf_reader.pages:
+                pdf_text += page.extract_text()
 
-        st.session_state.chat_history = [
-            {
-                "role": "system",
-                "content": f"You are a helpful assistant. Answer questions based on this document:\n\n{pdf_text}"
-            }
-        ]
-        st.success("Document loaded! Ask me anything about it.")
+            st.session_state.chat_history = [
+                {
+                    "role": "system",
+                    "content": f"You are a helpful assistant. Answer questions based on this document:\n\n{pdf_text}"
+                }
+            ]
+            st.session_state.loaded_file = file_name
+            st.success("Document loaded! Ask me anything about it.")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
