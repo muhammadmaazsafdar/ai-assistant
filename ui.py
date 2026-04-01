@@ -100,6 +100,7 @@ with st.sidebar:
             pdf_text = ""
             for page in pdf_reader.pages:
                 pdf_text += page.extract_text()
+                pdf_text = pdf_text[:150000]
 
             st.session_state.chat_history[0] = [
                 {
@@ -162,9 +163,13 @@ user_input = st.chat_input("Ask me anything...")
 if user_input:
     st.session_state.chat_history.append({"role": "user", "content": user_input})
 
+    clean_history = [
+        m for m in st.session_state.chat_history
+        if isinstance(m, dict) and m.get("role") and m.get("content")
+    ]
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
-        messages=st.session_state.chat_history
+        messages=clean_history
     )
 
     reply = response.choices[0].message.content
