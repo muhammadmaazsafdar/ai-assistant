@@ -112,8 +112,7 @@ with st.sidebar:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    message_count = len([m for m in st.session_state.get("chat_history", []) if m["role"] != "system"])
-
+message_count = len([m for m in st.session_state.get("chat_history", []) if isinstance(m, dict) and m.get("role") != "system"])
     st.markdown(f"""
     <div class="stat-box">
         <div class="stat-label">Messages</div>
