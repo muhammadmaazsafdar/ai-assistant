@@ -10,7 +10,8 @@ load_dotenv()
 st.set_page_config(
     page_title="Aria AI Assistant",
     page_icon="◆",
-    layout="centered"
+    layout="centered",
+    initial_sidebar_state="expanded"
 )
 
 st.markdown("""
@@ -79,6 +80,12 @@ PERSONAS = {
     "🎯 Career Coach": "You are a career coach specializing in tech careers. You help with resumes, interviews, salary negotiation, and career growth strategies."
 }
 
+# Initialize chat history BEFORE sidebar
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = [
+        {"role": "system", "content": PERSONAS["◆ Professional Assistant"]}
+    ]
+
 with st.sidebar:
     st.markdown('<div class="sidebar-title">◆ ARIA ASSISTANT</div>', unsafe_allow_html=True)
 
@@ -94,23 +101,18 @@ with st.sidebar:
     uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
 
     if uploaded_file is not None:
-        file_name = uploaded_file.name
-        if True:
-            pdf_reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.read()))
-            pdf_text = ""
-            for page in pdf_reader.pages:
-                pdf_text += page.extract_text()
-                pdf_text = pdf_text[:150000]
-                st.write(f"DEBUG: Extracted {len(pdf_text)} characters from PDF")
+        pdf_reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.read()))
+        pdf_text = ""
+        for page in pdf_reader.pages:
+            pdf_text += page.extract_text()
 
-            st.session_state.chat_history[0] = [
-                {
-                    "role": "system",
-                    "content": f"You are a helpful assistant. Answer questions based on this document:\n\n{pdf_text}"
-                }
-            ]
-            st.session_state.loaded_file = file_name
-            st.success("Document loaded! Ask me anything about it.")
+        pdf_text = pdf_text[:15000]
+
+        st.session_state.chat_history[0] = {
+            "role": "system",
+            "content": f"You are a helpful assistant. Answer questions based on this document:\n\n{pdf_text}"
+        }
+        st.success(f"Document loaded! ({len(pdf_text)} characters)")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -138,10 +140,15 @@ with st.sidebar:
         ]
         st.rerun()
 
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = [
-        {"role": "system", "content": PERSONAS[selected_persona]}
-    ]
+# Update persona if changed
+if st.session_state.chat_history[0]["content"] == PERSONAS.get(
+    list(PERSONAS.keys())[[v for v in PERSONAS.values()].index(st.session_state.chat_history[0]["content"])]
+    if st.session_state.chat_history[0]["content"] in PERSONAS.values() else list(PERSONAS.keys())[0]
+):
+    st.session_state.chat_history[0] = {
+        "role": "system",
+        "content": PERSONAS[selected_persona]
+    }
 
 st.markdown("""
 <div class="main-header">
@@ -168,6 +175,7 @@ if user_input:
         m for m in st.session_state.chat_history
         if isinstance(m, dict) and m.get("role") and m.get("content")
     ]
+
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
         messages=clean_history
