@@ -95,7 +95,7 @@ with st.sidebar:
 
     if uploaded_file is not None:
         file_name = uploaded_file.name
-        if st.session_state.get("loaded_file") != file_name:
+        if True:
             pdf_reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.read()))
             pdf_text = ""
             for page in pdf_reader.pages:
