@@ -101,7 +101,7 @@ with st.sidebar:
             for page in pdf_reader.pages:
                 pdf_text += page.extract_text()
 
-            st.session_state.chat_history = [
+            st.session_state.chat_history[0] = [
                 {
                     "role": "system",
                     "content": f"You are a helpful assistant. Answer questions based on this document:\n\n{pdf_text}"
