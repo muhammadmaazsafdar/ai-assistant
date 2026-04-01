@@ -150,7 +150,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 for message in st.session_state.chat_history:
-    if message["role"] == "system":
+    if not isinstance(message, dict):
+        continue
+    if message.get("role") == "system":
         continue
     with st.chat_message(message["role"]):
         st.write(message["content"])
