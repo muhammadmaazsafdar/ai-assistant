@@ -66,7 +66,6 @@ section[data-testid="stSidebar"] { background: #0f0f18; border-right: 1px solid 
 .stat-value { color: #e0e0ff; font-size: 1rem; font-weight: 500; margin-top: 0.2rem; }
 footer {visibility: hidden;}
 #MainMenu {visibility: hidden;}
-header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
