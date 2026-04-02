@@ -7,7 +7,7 @@ from src.features.export import export_chat
 
 def render_sidebar():
     with st.sidebar:
-        st.markdown('<div class="sidebar-title">◆ brosAI</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sidebar-title">◆ VOYA</div>', unsafe_allow_html=True)
 
         render_chat_list()
 

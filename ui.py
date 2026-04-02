@@ -10,7 +10,7 @@ from src.components.message import render_messages
 load_dotenv()
 
 st.set_page_config(
-    page_title="brosAI",
+    page_title="VOYA",
     page_icon="◆",
     layout="centered",
     initial_sidebar_state="expanded"
@@ -31,7 +31,7 @@ message_count = len([m for m in messages if isinstance(m, dict) and m.get("role"
 if message_count == 0:
     st.markdown("""
     <div class="main-header">
-        <h1>brosAI</h1>
+        <h1>VOYA</h1>
         <p>Your personal AI assistant</p>
     </div>
     <div class="divider"></div>
