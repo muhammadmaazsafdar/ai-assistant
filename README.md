@@ -81,21 +81,12 @@ streamlit run ui.py
 
 ---
 
-## Roadmap
-
-- [ ] Voice input support
-- [ ] Image upload and analysis
-- [ ] Persistent chat history across sessions
-- [ ] n8n automation workflow integration
-- [ ] Custom persona creation
-
----
 
 ## Author
 
 **Muhammad Maaz Safdar**
 - GitHub: [@muhammadmaazsafdar](https://github.com/muhammadmaazsafdar)
-- LinkedIn: (https://www.linkedin.com/in/muhammadmoaaz/)
+- LinkedIn: [Muhammad Moaaz Safdar](https://www.linkedin.com/in/muhammadmoaaz/)
 
 ---
 
